@@ -118,7 +118,139 @@ lst <- list("Moe", NULL, "Curly")
 compact(lst)
 
 #5.13: Removing list element using a condition
-lst <- list(NA, 
+lst <- list(NA, 0, NA) 
+lst %>% discard(is.na)
+lst <- list(3, "dog" , 2 , "cat", 1)
+lst %>%  
+  discard(is.character) #remove character from the list 
+#create function that may delete either null or na 
+is_na_null <- function(x) {
+  is.na(x) || is.null(x)
+}
+lst <- list(1,NA,2,NULL,3)
+lst %>% 
+  discard(is_na_null)
+
+mods <- list(lm(x~y1),
+             lm(x~y2),
+             lm(x~y3))
+filter-r2 <- function(model) {
+  summary(model)$r.squared < 0.7
+}
+mods %>% 
+  discard(filter_r2) #we define a function to only keep r sqaured superior to 0.7 applyig then the discard funtion 
+
+
+#5.14 Initializing a matrix 
+#create a matrix 
+matrix(0,2,3)
+matrix(NA,2,3)
+mat <- matrix(c(1,2,3),2,3) #difficult to read
+print(mat)
+theMatrix <-  c(
+  1, 2, 3,
+  1, 2, 3
+)
+mat <- matrix(theMatrix, 2, 3, byrow= TRUE)
+print(mat)
+#turn a vector into a matrix 
+v <- c(1,2,3,4,5,6)
+dim(v) <-  c(2,3)
+print(v)
+
+#Matrix operation 
+t(A) #transpose
+solve(A) #inverse
+A %*% B #matrix multiplication 
+diag(n) #contruct an identity matrix 
+
+
+#5.16: Name to rows and column of matrix
+rownames(mat) <- c("rowname1", "rowname2")
+colnames(mat) #...
+
+#5.17 Select row/column from matrix
+mat[1,] #result b a vector 
+mat[,3] 
+mat[1, , drop = FALSE] #result be a one column matrix 
+
+
+#5.18: Initializng a df from a column data 
+#data.frame function
+v1 <- c(1,5,8,6)
+v2 <- c(2,5,3,6)
+v3 <- c(8,9,6,32)
+df <- data.frame(v1,v2,v3)
+#if data is captured in a list of vectors : as.data.frame(list.f.vectors)
+df <- data.frame(variable_1 = v1, variable_2 = v2, variable_3 = v3) #to overrride the column name
+
+
+#5.19 Initializing a df from row data
+#function rbind 
+df1 <- data.frame(a=1, b=2, c="X")
+df2 <- data.frame(a=23, b=27, c="X")
+df3 <- data.frame(a=17, b=82, c="y")
+df <- rbind(df1,df2,df3)
+cbind(df1,df2,df3)
+#beware: by default string are converted to factors --> see data.frame(..., stringAsFactors = FALSE)
+i <- sapply(df, is.character) #which column is character 
+df[3] <- lapply(df[3], as.factor) #convert to factor  
+i <- sapply(df, is.factor) 
+i
+
+
+#5.20 : Append a row to a df 
+data(mpg)
+newrow <-  data.frame( manufacturer= "mercedes", model= "m4" ,displ = 1.8 , year =1997  , cyl =4 ,trans ="auto",      drv = "f" ,   cty=18  , hwy=29, fl= "p" ,   class= "compact")
+#create anew row 
+rbind(mpg, newrow)
+#or rbind(mpg, data.frame( manufacturer= "mercedes", model= "m4" ,displ = 1.8 , year =1997  , cyl =4 ,trans ="auto",      drv = "f" ,   cty=18  , hwy=29, fl= "p" ,   class= "compact"))
+
+
+#5.21: Selecting df column by position 
+#use the select function
+df %>%  select(n1,n2)
+install.packages("dyplr")
+library(dplyr)
+mpg %>% 
+  dplyr :: select(1,6)
+#select is part of the tidyverse package dplyr 
+#or
+mpg[[2]] #return a vector 
+mpg[2] #return a df 
+mpg[c(1,6)] # return a df 
+
+
+
+#5.22 Selecting data frame column by name 
+mpg %>% 
+  select("model","year")
+#or
+mpg[["model"]]
+mpg["model"]
+mpg[c("model", "year")]
+mpg[,"model"] #matrix style 
+
+
+
+#5.23: Changing name of df columns
+df %>%  rename(newname = oldname , ...)
+#other way 
+colnames(mpg) <-c("newname1","newname2")
+#select and rename at the same time
+df %>%  select(tom=v1, v2)
+
+
+#5.24: Removing NAs from df 
+
+
+
+
+
+
+
+
+
 
 
 
