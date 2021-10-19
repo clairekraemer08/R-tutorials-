@@ -76,6 +76,52 @@ years[1] %>%
 class(years[1])
 
 
+#5.8 Selecting list element by name 
+#want to access list element by their name 
+lst <- list(black = 1, red = 2 , green = 3)
+lst[["black"]]
+lst["black"]
+lst$black
+lst[c("black","green")]
+
+#5.9 Buliding a name/value association list 
+#want to create dictionnary --> list function
+values <- c(1,2,3)
+names <- c("dark", "white","yellow")
+lst <- list() #empty list
+lst[names] <- values
+values <- -2:2
+names <- c("a", "b", "c", "d","e")
+lst <- list()
+lst[names] <- values
+cat("The a limit is", lst[["a"]], "\n")
+
+
+#5.10 Removing element from a list 
+lst[["a"]]<- NULL #remove a from the list 
+lst[c("a","b")] <-  NULL #remove several elemenfrom a list 
+
+#5.11: Flattening a list into a vector 
+#use the unlist function 
+iq.score <- list(2,30,50,90)
+mean(iq.score) #cannot 
+mean(unlist(iq.score)) #fcan because unlisted
+cat(iq.score, "\n") # cannot cat a list , only scalar and vectors 
+cat("IQ Scores:", unlist(iq.score), "\n")
+
+
+#5.12: Removing null element from a list 
+#use the function compact
+install.packages("purrr")
+library(purrr)
+lst <- list("Moe", NULL, "Curly")
+compact(lst)
+
+#5.13: Removing list element using a condition
+lst <- list(NA, 
+
+
+
 
 
 
