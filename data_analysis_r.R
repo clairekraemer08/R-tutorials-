@@ -242,12 +242,56 @@ df %>%  select(tom=v1, v2)
 
 
 #5.24: Removing NAs from df 
+#use na.omit(df)
+df <- data.frame(
+  x=c(1,2,5,NA),
+  y=c(2,NA,5,9)
+)
+df %>% na.omit()
+df_clean <- df %>% na.omit() #delete all rows with NA
+#compute the culmultative sum of rows 
+df_clean %>%  cumsum()
 
 
+#5.25 Excluding columns by name 
+library(dplyr)
+select(mpg, -model , -manufacturer) #remove the model variable
+mpg %>% 
+  select("year", "cty") %>% 
+  cor
+
+#5.26 Combining 2 df 
+#combine : cbind(df1,df2)
+#stack : rbind(df1,df2)
+
+df1 <- data.frame(c(1,2))
+df2 <- data.frame(c(2,3))
+cbind(df1,df2)
+
+df1 <- data.frame(x= c("a","b"), y =c(1,2) )
+df2 <- data.frame(x= c("c","b"), y =c(1,7) )
+rbind(df1,df2)
+
+#5.27 Merging df by common column
+library(dplyr)
+inner_join(df1,df2, by ="col") #only row that appear in both df
+full_join(df1,df2, by ="col") #all row that appear in either data 
+left_join() # all row from df1, only df2 match
+right_join() #all row from df2, only df1 match 
 
 
+#5.28 Converting one atomic value into another 
+#as.character(x)
+#as.complex(x)
+#as.numeric(x) or as.double(x)
+#as.integer(x)
+#as.logical(x)
 
-
+# 5.29 Converting one structured data type into another
+#as.data.frame(x)
+#as.list(x)
+#as.matrix(x)
+#as.vector(x)
 
 
 
