@@ -273,3 +273,46 @@ print(p3, vp = viewport(layout.pos.col = 3, height = 5))
 # add a hostogram on the map for the distribution of th variable 
 
 
+tm_shape(blocks_sf) +
+  tm_polygons("P_OWNEROCC", title = "Owner Occ", palette = "-GnBu", 
+              breaks = c(0, round(quantileCuts(blocks$P_OWNEROCC, 6), 1)), 
+              legend.hist = T) +
+  tm_scale_bar(width = 0.22) +
+  tm_compass(position = c(0.8, 0.07)) +
+  tm_layout(frame = F , title = "New Haven",
+            title.size = 2, title.position = c(0.55, "top"),
+            legend.hist.size= 0.5)
+# possible to compute a derived attribute value on the fly in tmap              
+# add a projection to tracts data and convert tracts data to sf
+proj4string(tracts) <- proj4string(blocks)
+tracts_sf <- st_as_sf(tracts)
+tracts_sf <- st_transform(tracts_sf, "+proj=longlat +ellps=WGS84")
+# plot
+tm_shape(blocks_sf) +
+  tm_fill(col="POP1990", convert2density=TRUE,
+          style="kmeans", title=expression("Population (per " ∗ km^2 ∗ ")"), 
+          legend.hist=F, id="name") +
+  tm_borders("grey25", alpha=.5) +
+  # add tracts context
+  tm_shape(tracts_sf) +
+  tm_borders("grey40", lwd=2) +
+  tm_format( "NLD", bg.color="white", frame = FALSE, 
+                legend.hist.bg.color="grey90")
+
+#compute population density manually
+#add area in km^2 to blocks 
+blocks_sf$area = st_area(blocks_sf) / (1000*1000)
+?st_area()
+summary(blocks_sf$POP1990/blocks_sf$area)
+
+# Map multiple attributes using tmap 
+tm_shape(blocks_sf) +
+  tm_fill(c("P_OWNEROCC", "P_BLACK"))+
+  tm_borders()+
+  tm_layout(legend.format = list(digits=0),
+            legend.position = c("left", "bottom"),
+            legend.text.size = 0.5, 
+            legend.title.size = 0.8) # two maps 
+
+
+
