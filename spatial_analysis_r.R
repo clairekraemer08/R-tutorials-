@@ -131,4 +131,65 @@ tm_shape(georgia_sf_sub) +
   tm_layout(frame = FALSE, title = "A subset of Georgia",
             title.size = 1.5, title.position = c(0., "bottom"))
 
+# 3.4.4: ADDING CONTEXT
+# In some case  a map with background context may be more informative 
+#Load librairies
+library(pacman)
+pacman:: p_load(raster, OpenStreetMap, RgoogleMaps, grid, rgdal, tidyverse, reshape2, ggmosaic, GISTools, sf, tmap)
+#Using OpenStreetMap
+install.packages(c("OpenStreetMap"), depend = T)
+library(OpenStreetMap) #plot you data over the tiles fropm OpenStreetMap
+#here, easier to work with sp object
+#define uper left, lower right corners
+georgia.sub <- georgia[index, ] #get the subset with index of interest defined in the vector index
+ul <-  as.vector(cbind(bbox(georgia.sub)[2,2], bbox(georgia.sub)[1,1]))
+lr <- as.vector(cbind(bbox(georgia.sub)[2,1], bbox(georgia.sub)[1,2]))
+#download the map tile 
+myMap <-  openmap(ul,lr)
+#plot the layer a,d the backdrop 
+par(mar=c(0,0,0,0))
+plot(myMap, removeMargin = F)
+plot(spTransform(georgia.sub, osm()), add = T , lwd = 2) #spTransform from package rgdal
+# ----> output map using OpenStreetMap
+
+#Using Googlemap 
+install.packages(c("RgoogleMaps"),depend=T)
+library(RgoogleMaps)
+library(maptools)
+#convert the subset
+shp <- SpatialPolygons2PolySet(georgia.sub) # Convert SpatialPolygons to PolySet data
+#determine the extent of the subset 
+bb <- qbbox(lat = shp[,"Y"], lon=shp[,"X"]) #compute the bounding lat lon
+#download map data and store it
+myMap <- GetMap.bbox(bb$lonR, bb$latR, destfile = "DC.jpg")
+#plot the layer and the backdrop
+par(mar=c(0,0,0,0))
+PlotPolysOnStaticMap(myMap , shp, lwd= 2,
+                     col= rgb (0.25,0.25,0.25,0.025), add=F)
+
+#using Leaflet (tmap package) , cool for interactive map 
+library(tmap)
+tmap_mode('view')# set to interactive view
+tm_shape(georgia_sf_sub) + 
+  tm_polygons(col = "#C6DBEF80")
+#remember to reset the tmap_mod to plot
+tmap_mode("plot")
+
+# 3.4.5 SAVING THE MAP 
+# plot > export > copy to clipboard/ save as image 
+# saving usng R command enable changes : call the draw using source("filename.R)
+source("newhavenmap.R")
+
+
+
+# 3.5: MAPPING SPAIAL DATA ATTRIBUTES
+
+
+
+
+
+
+
+
+
 
