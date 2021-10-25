@@ -183,13 +183,93 @@ source("newhavenmap.R")
 
 
 # 3.5: MAPPING SPAIAL DATA ATTRIBUTES
+#3.5.2 Attributes and data frames
+library(pacman)
+pacman:: p_load(raster, OpenStreetMap, RgoogleMaps, sp, sf, grid, rgdal, tidyverse, reshape2, ggmosaic, GISTools, sf, tmap)
+#Using 
+rm(list=ls()) #clear the environment 
+data(newhaven)
+ls() #load and list 
+blocks_sf <-  st_as_sf(blocks)
+breach_sf <-  st_as_sf(breach)
+tracts_sf <- st_as_sf(tracts) # covert sp to sf
+summary(blocks_sf)
+class(blocks_sf)
+summary(breach_sf)
+class(breach_sf) # it has only geometry attributes, no thematic attributes ie locations only 
+summary(tracts_sf)
+class(tracts_sf) # have a look at the attribute and classes
+data.frame(blocks_sf)
+head(data.frame(blocks_sf)) #access attributes 
+colnames(blocks_sf) # acces the names of the columns
+#or
+names(blocks_sf)
+# the attribute _VACCANT describes the % of hh that are unoccupied 
+data.frame(blocks_sf$P_VACANT) #access the variable 
+blocks$P_VACANT # access directly from the sp object
+attach(data.frame(blocks_sf)) #attach the data so attribute can be accessed only by their name 
+hist(P_VACANT) # one can directly access the data and plo the hist
+detach(data.frame(blocks_sf)) # detach the data once used 
+#the breach data can be used to create a heat map rasterdatased
+breach.dens = st_as_sf(kde.points(breach, lims = tracts))
+summary(breach.dens)
+breach.dens
+plot(breach.dens)
+# we can assign new attributes to the spatial objects  for sf and sp. 
+# create a normally distributed rndom value for each 129 areas in blocks_sf
+blocks_sf$Randvar <- rnorm(nrow(blocks_sf))
 
 
+# 3.5.3: Mapping polygons ans attributes 
+#choropleth is thematic map where areas are shaded in proportion to their attributes. 
+#use of he tmap package 
 
+tmap_mode('plot')
+tm_shape(blocks_sf) + # also possible with sp format 
+  tm_polygons("P_OWNEROCC") #includes the legend atomatically 
 
+# one can control the class interval
+tm_shape(blocks_sf)+
+  tm_polygons("P_VACANT", breaks = seq(0,100, by= 25))
 
+#other way 
+tm_shape(blocks_sf) +
+  tm_polygons("P_OWNEROCC", breaks =  c(10,40,60,90))
 
+#legend placement and title 
+tm_shape(blocks_sf)+
+  tm_polygons("P_OWNEROCC", title= "Owner Occ") +
+  tm_layout(legend.title.size = 1,
+            legend.text.size = 1,
+            legend.position = c(0.1,0.1))
+#colorsare generated using the RColorBrewer package loaded with tmap andGIStools
+display.brewer.all()
+brewer.pal(5,'Blues') # n = number of scales , display a   list of color ref 
 
+tm_shape(blocks_sf)+
+  tm_polygons("P_OWNEROCC", title = "Owner Occ", palette = "Reds")+
+  tm_layout(legend.title.size= 1)
 
+# multiple plots - equal interval - k(means) interval - quantiles interval 
+# 1: equal intervals
+p1 <- tm_shape(blocks_sf)+
+  tm_polygons("P_OWNEROCC", title = "Owner occ", palette = "Blues")+
+  tm_layout(legend.title.size = 0.7)
+# 2 : Mean kernel 
+p2 <- tm_shape(blocks_sf)+
+  tm_polygons("P_OWNEROCC", title = "Owner occ", palette = "Oranges", style = "kmeans")+
+  tm_layout(legend.title.size = 0.7)
+#3: quantiles 
+p3 <- tm_shape(blocks_sf)+
+  tm_polygons("P_OWNEROCC", title = "Owner occ", palette = "Greens", breaks = c(0, round(quantileCuts(blocks_sf$P_OWNEROCC, 6), 1)))+
+  tm_layout(legend.title.size = 0.7)
+library(grid)
+grid.newpage() # set up the layout 
+pushViewport(viewport(layout = grid.layout(1,3)))
+print(p1, vp = viewport(layout.pos.col = 1, height = 5))
+print(p2, vp = viewport(layout.pos.col = 2, height = 5))
+print(p3, vp = viewport(layout.pos.col = 3, height = 5))
+
+# add a hostogram on the map for the distribution of th variable 
 
 
