@@ -619,4 +619,56 @@ ggplot(blocks@data , aes(P_VACANT)) +
   xlab("percentage vacant")+
   labs(title = "The distributon of vacant property percentages")
 
+#  Boxes on high / low vacancy areas (where proportion of vacant properties is > 10%)
+# using ggplot : geom_boxplot
+
+melt(blocks@data)
+
+#a logical test
+index <- blocks$P_VACANT > 10
+
+#assign 2 : high , 1: low
+blocks$vac <- index+1
+
+#label it / convert the variable into factor 
+blocks$vac <- factor(blocks$vac, labels = c("Low", "High"))
+blocks@data
+
+# apply the geom_boxplot function 
+ggplot(melt(blocks@data[, c("P_OWNEROCC", "P_WHITE", "P_BLACK", "vac")]),
+        aes(variable, value)) +
+  geom_boxplot() +
+  facet_wrap(~vac) # define the value to separe into groups
+
+
+# add features
+ggplot(melt(blocks@data[, c("P_OWNEROCC", "P_WHITE", "P_BLACK", "vac")]),
+       aes(variable, value)) +
+  geom_boxplot(colour = "yellow", fill = "wheat", alpha = 0.7) +
+  facet_wrap(~vac) +
+  xlab("") +
+  ylab("Percentage") +
+  theme_dark() +
+  ggtitle("Boxplot of High and Low property vacancies")
+
+# 3.6.2 Scatter Plots and Regressions
+# visualize trends 
+plot(blocks$P_VACANT/100, blocks$P_WHITE/100) #scatter plot 
+plot(blocks$P_VACANT/100, blocks$P_BLACK/100)
+
+# assign some variable 
+p.vac <- blocks$P_VACANT/100
+p.w <- blocks$P_WHITE/100
+p.b <-  blocks$P_BLACK/100
+
+#bind together 
+df <- data.frame(p.vac, p.w, p.b) 
+
+#fit regression 
+mod.1 <-  lm(p.vac ~ p.w , data = df)
+mod.2 <- lm(p.vac ~p.b, data =df) 
+
+# access result of the regression 
+summary(mod.1)
+
 
