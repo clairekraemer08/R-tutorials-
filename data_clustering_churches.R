@@ -1,59 +1,85 @@
 # EXEMPLE OF DATA CLUSTERING using shape file of churches 
 # https://gastongov.com/maps/gis_data_download/shapefiles.php
 
+
+# set working directory 
 setwd("C:\Users\Kraemer\Documents\PROGRAM DOCUMENTATION\R\R_tutorials_git\R-tutorials-")
-#Load the packages and the data 
-rm(list=ls()) # clear the environment 
+
+# clear the environement 
+rm(list=ls()) 
+
+#load the packages 
 pacman::p_load(geometr, tidyverse, maptools, RgoogleMaps, rgeos, dismo, st, tm, sf, geosphere, tmap) #load librairies 
-churches <- st_read("SHP/Churches.shp") # read the shape file 
+
+# read the shape file 
+churches <- st_read("SHP/Churches.shp") 
+
+# see the class of data 
 class(churches) # class is "sf " "dataframe"
 
-
-# We want the CRS to be : "+proj=longlat +datum=WGS84 +no_defs"
+# Define the wanted CRS : we want the CRS to be : "+proj=longlat +datum=WGS84 +no_defs"
 churches <- st_transform(churches, crs("+proj=longlat +datum=WGS84 +no_defs")) # change the CRS 
+
+# unlist to recover lat and lon keeping the data as sf
 churches <- churches %>%
   mutate(lat = unlist(map(churches$geometry,1)),
-         long = unlist(map(churches$geometry,2))) # unlist to recover lat and lon keeping the data as sf
+         long = unlist(map(churches$geometry,2)))
 
-xy <- churches[,c("long","lat")] # substract the coordinate to have (lon,lat) 
-churches_sp <- as(churches, "Spatial") #convert st to sp 
-getCRS(churches_sp) #  get the CRS --> we get the CRS we wanted
-xy <- as.data.frame(churches) # tranform to df to use the SpatialPointDataFrame command
-xy <- xy[,c("long","lat")] # just keep the (lon,lat)
+# substract the coordinate to have (lon,lat) 
+xy <- churches[,c("long","lat")] 
 
+#convert st to sp 
+churches_sp <- as(churches, "Spatial") 
 
+#  get the CRS --> we get the CRS we wanted
+getCRS(churches_sp) 
+
+# tranform to df to use the SpatialPointDataFrame command
+xy <- as.data.frame(churches)
+
+# just keep the (lon,lat)
+xy <- xy[,c("long","lat")]
+
+# convert to a SpatialPointDataFrame object
 churches <- SpatialPointsDataFrame(xy,
                                    data = as.data.frame(churches), 
                                    proj4string = CRS(churches_sp@proj4string@projargs))
 
-mdist <- distm(churches) # create a matrix of distance between points 
+#check the class 
+class(churches)
+
+# create a matrix of distance between points 
+mdist <- distm(churches) 
+
+# cluster all points using a hierarchical clustering approach
 hc <- hclust(as.dist(mdist), method="complete") 
+
+# define clusters based on a tree "height", set thedesired number of clusters and add them to the SpDataFrame
 churches$clust <- cutree(hc, k=5)
 
-# plot it quickly 
+# 1:  plot it quickly 
 tm_shape(churches)+
   tm_text("clust", size =0.3)+
   tm_layout(frame = F)
 
-
-# data visualisation 
-# interactive map using Leaflet
+# 2: data visualization 
+# load libraries 
 pacman:: p_load(dismo, rgeos, tmap)
-churches_sf <- st_as_sf(churches_sp)
-tmap_mode('plot')# set to interactive view
 
 # expand the extent of ploting
 churches@bbox[] <- as.matrix(extend(extent(churches), 0.001))
-# get the centroid coords for each cluster 
-cent <-  matrix(ncol=2, nrow=max(churches$clust))#create a matrix with lines = nb of clusters
+
+# get the centroid coords for each cluster : create a matrix with lines = nb of clusters
+cent <-  matrix(ncol=2, nrow=max(churches$clust)) 
   for (i in 1:max(churches$clust))               
     cent[i,] <- gCentroid(subset(churches, clust == i))@coords # fill data to get centroids 
-#compute circles around the centroid coords using a 40 m radius 
-#from the dismo package 
+
+#compute circles around the centroid coords using a 40 m radius (dismo package)
 ci <- circles(cent, d=5000, lonlat = T)
+
 # plot 
 plot(ci@polygons, axes = T)
-plot(churches, col=rainbow(5)[factor(churches$clust)], add = T)  # plot 
+plot(churches, col=rainbow(5)[factor(churches$clust)], add = T)  
 
 
 
